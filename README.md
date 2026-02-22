@@ -53,6 +53,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
+For development with debug mode:
+```bash
+FLASK_DEBUG=true python app.py
+```
+
+**Note**: Debug mode should NEVER be enabled in production as it poses a security risk.
+
 2. Open your browser and navigate to:
 ```
 http://localhost:5000
@@ -147,6 +154,26 @@ Returns the health status of the application
 - **Input Size**: 224x224 pixels
 - **Output**: 25 disease classes
 - **Framework**: TensorFlow/Keras
+
+## Production Deployment
+
+For production deployment, use a production-grade WSGI server instead of Flask's built-in server:
+
+```bash
+# Install gunicorn
+pip install gunicorn
+
+# Run with gunicorn
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
+```
+
+**Security Recommendations:**
+- Never enable debug mode in production
+- Use HTTPS (SSL/TLS) for secure communication
+- Implement rate limiting to prevent abuse
+- Add authentication if needed
+- Use environment variables for sensitive configuration
+- Set up proper logging and monitoring
 
 ## Technologies Used
 

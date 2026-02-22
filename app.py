@@ -151,6 +151,8 @@ if __name__ == '__main__':
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
-    # Run in debug mode on localhost for development
-    # For production, use a WSGI server like gunicorn with debug=False
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Get debug mode from environment variable, default to False for security
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    
+    # For production, use a WSGI server like gunicorn instead of Flask's built-in server
+    app.run(debug=debug_mode, host='127.0.0.1', port=5000)
