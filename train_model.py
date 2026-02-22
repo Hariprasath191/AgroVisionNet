@@ -84,13 +84,26 @@ def train_model(train_dir, val_dir=None):
         width_shift_range=0.2,
         height_shift_range=0.2,
         horizontal_flip=True,
-        zoom_range=0.2,
-        validation_split=0.2 if val_dir is None else 0.0
+        zoom_range=0.2
     )
+    
+    # Validation data generator (only rescaling, no augmentation)
+    val_datagen = ImageDataGenerator(rescale=1./255)
     
     # Load training data
     if val_dir is None:
-        train_generator = train_datagen.flow_from_directory(
+        # Use validation split
+        train_datagen_with_split = ImageDataGenerator(
+            rescale=1./255,
+            rotation_range=20,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            horizontal_flip=True,
+            zoom_range=0.2,
+            validation_split=0.2
+        )
+        
+        train_generator = train_datagen_with_split.flow_from_directory(
             train_dir,
             target_size=(IMG_SIZE, IMG_SIZE),
             batch_size=BATCH_SIZE,
@@ -98,7 +111,7 @@ def train_model(train_dir, val_dir=None):
             subset='training'
         )
         
-        val_generator = train_datagen.flow_from_directory(
+        val_generator = ImageDataGenerator(rescale=1./255).flow_from_directory(
             train_dir,
             target_size=(IMG_SIZE, IMG_SIZE),
             batch_size=BATCH_SIZE,
@@ -113,7 +126,6 @@ def train_model(train_dir, val_dir=None):
             class_mode='categorical'
         )
         
-        val_datagen = ImageDataGenerator(rescale=1./255)
         val_generator = val_datagen.flow_from_directory(
             val_dir,
             target_size=(IMG_SIZE, IMG_SIZE),

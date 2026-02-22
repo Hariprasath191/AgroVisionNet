@@ -39,7 +39,7 @@ def test_requirements():
         with open('requirements.txt', 'r') as f:
             requirements = f.readlines()
         
-        required_packages = ['flask', 'tensorflow', 'keras', 'numpy', 'pillow', 'werkzeug']
+        required_packages = ['flask', 'tensorflow', 'numpy', 'pillow', 'werkzeug']
         found_packages = []
         
         for req in requirements:

@@ -64,6 +64,13 @@ def preprocess_image(image_path):
     img = Image.open(image_path)
     img = img.resize((224, 224))
     img_array = np.array(img)
+    
+    # Ensure RGB format
+    if len(img_array.shape) == 2:  # Grayscale
+        img_array = np.stack([img_array] * 3, axis=-1)
+    elif img_array.shape[2] == 4:  # RGBA
+        img_array = img_array[:, :, :3]
+    
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
@@ -79,7 +86,7 @@ def predict_disease(image_path):
     
     try:
         img_array = preprocess_image(image_path)
-        predictions = model.predict(img_array)
+        predictions = model.predict(img_array, verbose=0)
         predicted_class_idx = np.argmax(predictions[0])
         confidence = float(predictions[0][predicted_class_idx])
         
@@ -115,7 +122,11 @@ def predict():
         return jsonify({'error': 'No file selected'}), 400
     
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        # Add timestamp to filename to avoid conflicts
+        import time
+        timestamp = int(time.time())
+        original_filename = secure_filename(file.filename)
+        filename = f"{timestamp}_{original_filename}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         
@@ -140,4 +151,6 @@ if __name__ == '__main__':
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Run in debug mode on localhost for development
+    # For production, use a WSGI server like gunicorn with debug=False
+    app.run(debug=True, host='127.0.0.1', port=5000)

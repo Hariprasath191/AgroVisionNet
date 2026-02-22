@@ -1,8 +1,8 @@
 # AgroVisionNet Configuration
 
 # Application Settings
-DEBUG = True
-HOST = '0.0.0.0'
+DEBUG = False  # Set to True only in development
+HOST = '127.0.0.1'  # Use '0.0.0.0' for production with debug=False
 PORT = 5000
 
 # Upload Settings
