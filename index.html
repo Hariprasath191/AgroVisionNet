@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroVisionNet — Smart Crop Intelligence</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       ROOT & THEME VARIABLES
+    ═══════════════════════════════════════════════ */
+    :root {
+      --soil:       #2c1a0e;
+      --bark:       #4a2c17;
+      --clay:       #7a4528;
+      --rust:       #b05c2a;
+      --wheat:      #d4a853;
+      --golden:     #f0c040;
+      --leaf-dark:  #1a4a2e;
+      --leaf:       #2d6a4f;
+      --leaf-light: #52b788;
+      --mint:       #95d5b2;
+      --sky-dawn:   #fde68a;
+      --sky-day:    #d8f3dc;
+      --sky-dusk:   #fed7aa;
+      --cream:      #fefae0;
+      --parchment:  #f5edd6;
+      --fog:        rgba(254,250,224,0.6);
+
+      --font-display: 'Playfair Display', serif;
+      --font-body:    'Crimson Pro', serif;
+      --font-mono:    'DM Mono', monospace;
+
+      --shadow-leaf: 0 20px 60px rgba(45,106,79,0.25);
+      --shadow-soil: 0 20px 60px rgba(44,26,14,0.35);
+      --radius-xl:   24px;
+      --radius-pill: 999px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       BASE
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--parchment);
+      color: var(--soil);
+      overflow-x: hidden;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='%2352b788' opacity='0.8'/%3E%3C/svg%3E") 10 10, auto;
+    }
+
+    ::selection { background: var(--leaf-light); color: var(--cream); }
+
+    /* ═══════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--parchment); }
+    ::-webkit-scrollbar-thumb { background: var(--leaf); border-radius: 4px; }
+
+    /* ═══════════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════════ */
+    #mainNav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 1rem 2rem;
+      background: rgba(26, 74, 46, 0.0);
+      backdrop-filter: blur(0px);
+      transition: all 0.5s ease;
+      border-bottom: 1px solid transparent;
+    }
+    #mainNav.scrolled {
+      background: rgba(26, 74, 46, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82,183,136,0.3);
+      padding: 0.6rem 2rem;
+    }
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--cream) !important;
+      text-decoration: none;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-brand span.wheat-icon {
+      font-size: 1.6rem;
+      animation: swayBrand 4s ease-in-out infinite alternate;
+      display: inline-block;
+    }
+    @keyframes swayBrand {
+      from { transform: rotate(-5deg); }
+      to   { transform: rotate(5deg); }
+    }
+    .nav-link-custom {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(254,250,224,0.85) !important;
+      text-decoration: none;
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-pill);
+      transition: all 0.3s;
+      letter-spacing: 0.3px;
+    }
+    .nav-link-custom:hover {
+      color: var(--cream) !important;
+      background: rgba(82,183,136,0.2);
+    }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--leaf-light), var(--leaf));
+      color: var(--cream) !important;
+      padding: 0.5rem 1.4rem;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(82,183,136,0.4);
+      transition: all 0.3s;
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(82,183,136,0.5);
+    }
+
+    /* ═══════════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════════ */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Sky gradient layers */
+    .sky-layer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        #87ceeb 0%,
+        #b8e4f7 20%,
+        #d8f3dc 45%,
+        #fde68a 70%,
+        #fed7aa 85%,
+        #c8a96e 100%
+      );
+      animation: skyCycle 20s ease-in-out infinite alternate;
+    }
+    @keyframes skyCycle {
+      0%   { filter: hue-rotate(0deg) brightness(1); }
+      50%  { filter: hue-rotate(-20deg) brightness(1.1); }
+      100% { filter: hue-rotate(10deg) brightness(0.95); }
+    }
+
+    /* Sun */
+    .sun {
+      position: absolute;
+      top: 8%;
+      right: 12%;
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff8b0 0%, #f0c040 50%, #f4a261 100%);
+      box-shadow:
+        0 0 40px 20px rgba(240,192,64,0.4),
+        0 0 100px 50px rgba(240,192,64,0.2),
+        0 0 200px 80px rgba(240,192,64,0.1);
+      animation: sunPulse 6s ease-in-out infinite alternate;
+    }
+    @keyframes sunPulse {
+      from { box-shadow: 0 0 40px 20px rgba(240,192,64,0.4), 0 0 100px 50px rgba(240,192,64,0.2); transform: scale(1); }
+      to   { box-shadow: 0 0 60px 30px rgba(240,192,64,0.5), 0 0 140px 70px rgba(240,192,64,0.25); transform: scale(1.05); }
+    }
+
+    /* Clouds */
+    .cloud {
+      position: absolute;
+      background: rgba(255,255,255,0.75);
+      border-radius: 50px;
+      filter: blur(2px);
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.75);
+      border-radius: 50%;
+    }
+    .cloud-1 { width:180px; height:50px; top:12%; left:5%; animation: driftCloud 35s linear infinite; }
+    .cloud-1::before { width:90px; height:90px; top:-40px; left:20px; }
+    .cloud-1::after  { width:60px; height:60px; top:-25px; right:25px; }
+    .cloud-2 { width:120px; height:35px; top:20%; left:40%; animation: driftCloud 50s linear infinite 10s; opacity:0.6; }
+    .cloud-2::before { width:60px; height:60px; top:-28px; left:15px; }
+    .cloud-2::after  { width:45px; height:45px; top:-18px; right:18px; }
+    .cloud-3 { width:150px; height:40px; top:8%; left:60%; animation: driftCloud 42s linear infinite 5s; opacity:0.5; }
+    .cloud-3::before { width:75px; height:75px; top:-35px; left:18px; }
+    .cloud-3::after  { width:55px; height:55px; top:-22px; right:22px; }
+    @keyframes driftCloud {
+      from { transform: translateX(-300px); }
+      to   { transform: translateX(110vw); }
+    }
+
+    /* Birds */
+    .birds-container { position: absolute; top: 15%; left: 0; right: 0; }
+    .bird {
+      position: absolute;
+      font-size: 1.2rem;
+      opacity: 0.6;
+      animation: flyBird linear infinite;
+    }
+    .bird:nth-child(1) { top:0; animation-duration: 18s; animation-delay: 0s; font-size: 0.9rem; }
+    .bird:nth-child(2) { top:30px; animation-duration: 22s; animation-delay: 3s; }
+    .bird:nth-child(3) { top:10px; animation-duration: 26s; animation-delay: 7s; font-size: 0.8rem; }
+    @keyframes flyBird {
+      from { transform: translateX(-5vw) scaleX(1); opacity: 0; }
+      5%   { opacity: 0.7; }
+      95%  { opacity: 0.7; }
+      to   { transform: translateX(110vw) scaleX(1); opacity: 0; }
+    }
+
+    /* Ground */
+    .ground-layer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 38%;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(44,26,14,0.05) 30%,
+        #4a2c17 60%,
+        #2c1a0e 100%
+      );
+    }
+
+    /* Wheat field canvas area */
+    .wheat-field {
+      position: absolute;
+      bottom: 18%;
+      left: 0; right: 0;
+      height: 220px;
+      display: flex;
+      align-items: flex-end;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* Individual stalks */
+    .stalk-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      flex: 1;
+      justify-content: center;
+    }
+    .stalk {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: bottom center;
+    }
+    .stalk-head {
+      font-size: 1.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .stalk-body {
+      width: 3px;
+      background: linear-gradient(to bottom, #8B6914, #5c3d11);
+      border-radius: 2px;
+    }
+
+    /* Sway animations — multiple variants */
+    .sway-a { animation: swayA 3s ease-in-out infinite alternate; }
+    .sway-b { animation: swayB 3.5s ease-in-out infinite alternate; }
+    .sway-c { animation: swayC 2.8s ease-in-out infinite alternate; }
+    .sway-d { animation: swayD 4s ease-in-out infinite alternate; }
+    .sway-e { animation: swayE 3.2s ease-in-out infinite alternate; }
+    @keyframes swayA { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
+    @keyframes swayB { from { transform: rotate(-8deg); } to { transform: rotate(4deg); } }
+    @keyframes swayC { from { transform: rotate(-4deg); } to { transform: rotate(9deg); } }
+    @keyframes swayD { from { transform: rotate(-7deg); } to { transform: rotate(5deg); } }
+    @keyframes swayE { from { transform: rotate(-5deg); } to { transform: rotate(8deg); } }
+
+    /* Floating pollen/dust particles */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatParticle linear infinite;
+    }
+    @keyframes floatParticle {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(-80vh) translateX(40px) scale(0.3); opacity: 0; }
+    }
+
+    /* Hero Content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      padding-top: 6rem;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(82,183,136,0.25);
+      border: 1px solid rgba(82,183,136,0.5);
+      backdrop-filter: blur(10px);
+      color: var(--leaf-dark);
+      padding: 0.4rem 1.2rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease both;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--soil);
+      text-shadow: 0 2px 20px rgba(254,250,224,0.5);
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease 0.15s both;
+    }
+    .hero-title .accent {
+      color: var(--leaf);
+      font-style: italic;
+      position: relative;
+      display: inline-block;
+    }
+    .hero-title .accent::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--leaf-light), var(--wheat));
+      border-radius: 2px;
+      animation: lineGrow 1s ease 0.8s both;
+      transform-origin: left;
+    }
+    @keyframes lineGrow {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    .hero-subtitle {
+      font-family: var(--font-body);
+      font-size: 1.3rem;
+      color: var(--bark);
+      line-height: 1.7;
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+      animation: fadeInUp 0.8s ease 0.3s both;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease 0.45s both;
+    }
+    .btn-primary-farm {
+      background: linear-gradient(135deg, var(--leaf), var(--leaf-light));
+      color: var(--cream);
+      border: none;
+      padding: 0.9rem 2.2rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(45,106,79,0.4);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary-farm::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+    }
+    .btn-primary-farm:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 14px 40px rgba(45,106,79,0.5);
+      color: var(--cream);
+    }
+    .btn-secondary-farm {
+      background: rgba(254,250,224,0.7);
+      backdrop-filter: blur(10px);
+      color: var(--leaf-dark);
+      border: 2px solid rgba(82,183,136,0.5);
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-secondary-farm:hover {
+      background: rgba(82,183,136,0.15);
+      border-color: var(--leaf-light);
+      transform: translateY(-2px);
+      color: var(--leaf-dark);
+    }
+
+    /* Stats strip */
+    .hero-stats {
+      position: absolute;
+      bottom: 22%;
+      right: 5%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      animation: fadeInRight 1s ease 0.6s both;
+    }
+    .stat-card {
+      background: rgba(254,250,224,0.75);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(82,183,136,0.35);
+      border-radius: 16px;
+      padding: 0.9rem 1.4rem;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(45,106,79,0.15);
+      min-width: 130px;
+      transition: transform 0.3s;
+    }
+    .stat-card:hover { transform: scale(1.05) translateX(-4px); }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--leaf);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-top: 0.2rem;
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 3%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--bark);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: bounceDown 2s ease-in-out infinite;
+    }
+    .scroll-arrow {
+      width: 28px; height: 28px;
+      border: 2px solid var(--leaf);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--leaf);
+    }
+    @keyframes bounceDown {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       SECTION STYLES (shared)
+    ═══════════════════════════════════════════════ */
+    section { padding: 6rem 0; }
+
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--leaf-light);
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 30px; height: 2px;
+      background: var(--leaf-light);
+      border-radius: 1px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--soil);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .section-title em { font-style: italic; color: var(--leaf); }
+    .section-desc {
+      font-family: var(--font-body);
+      font-size: 1.15rem;
+      color: var(--clay);
+      line-height: 1.8;
+      max-width: 560px;
+    }
+
+    /* Reveal animations on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ═══════════════════════════════════════════════
+       ABOUT SECTION
+    ═══════════════════════════════════════════════ */
+    #about {
+      background: linear-gradient(180deg, var(--parchment) 0%, var(--cream) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #about::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(82,183,136,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .about-visual {
+      position: relative;
+      height: 480px;
+    }
+    .about-img-main {
+      position: absolute;
+      top: 0; left: 0;
+      width: 80%;
+      height: 380px;
+      border-radius: var(--radius-xl);
+      object-fit: cover;
+      box-shadow: var(--shadow-leaf);
+      overflow: hidden;
+    }
+    .about-img-main .img-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--leaf-dark) 0%, var(--leaf) 50%, var(--leaf-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8rem;
+      animation: gentleFloat 5s ease-in-out infinite alternate;
+    }
+    @keyframes gentleFloat {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-10px); }
+    }
+    .about-img-accent {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 55%;
+      height: 260px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 4px solid var(--cream);
+      box-shadow: var(--shadow-soil);
+    }
+    .about-img-accent .img-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, var(--wheat) 0%, var(--rust) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+    }
+    .about-dot {
+      position: absolute;
+      top: 45%; left: 72%;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--golden), var(--wheat));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 8px 30px rgba(212,168,83,0.5);
+      border: 4px solid var(--cream);
+      animation: rotateDot 12s linear infinite;
+      z-index: 5;
+    }
+    @keyframes rotateDot {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .about-dot span { animation: rotateDot 12s linear infinite reverse; }
+
+    /* ═══════════════════════════════════════════════
+       FEATURES SECTION
+    ═══════════════════════════════════════════════ */
+    #features {
+      background: linear-gradient(135deg, var(--leaf-dark) 0%, var(--leaf) 50%, #1b5e3b 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #features::before {
+      content: '🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿🌾🌿';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      font-size: 2rem;
+      letter-spacing: 10px;
+      opacity: 0.06;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      animation: scrollWheat 20s linear infinite;
+    }
+    @keyframes scrollWheat {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    #features .section-eyebrow { color: var(--mint); }
+    #features .section-eyebrow::before { background: var(--mint); }
+    #features .section-title { color: var(--cream); }
+    #features .section-title em { color: var(--golden); }
+
+    .feature-card {
+      background: rgba(254,250,224,0.07);
+      border: 1px solid rgba(149,213,178,0.2);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      height: 100%;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      cursor: default;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--leaf-light), var(--golden));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .feature-card:hover {
+      background: rgba(254,250,224,0.13);
+      border-color: rgba(149,213,178,0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+
+    .feature-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 18px;
+      background: rgba(82,183,136,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+      margin-bottom: 1.2rem;
+      transition: all 0.3s;
+    }
+    .feature-card:hover .feature-icon-wrap {
+      background: rgba(82,183,136,0.35);
+      transform: scale(1.1) rotate(-5deg);
+    }
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.6rem;
+    }
+    .feature-desc {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--mint);
+      line-height: 1.7;
+      opacity: 0.9;
+    }
+
+    /* ═══════════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════════ */
+    #how {
+      background: var(--cream);
+      position: relative;
+    }
+    .step-line {
+      position: absolute;
+      top: 50%;
+      left: calc(16.666% + 1.5rem);
+      right: calc(16.666% + 1.5rem);
+      height: 2px;
+      background: linear-gradient(90deg, var(--leaf-light), var(--wheat), var(--leaf-light));
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+    .step-card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .step-num {
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--leaf), var(--leaf-light));
+      color: var(--cream);
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 8px 24px rgba(45,106,79,0.35);
+      border: 4px solid var(--cream);
+      position: relative;
+      transition: all 0.3s;
+    }
+    .step-card:hover .step-num {
+      transform: scale(1.15);
+      box-shadow: 0 12px 36px rgba(45,106,79,0.5);
+    }
+    .step-icon {
+      position: absolute;
+      top: -14px; right: -14px;
+      font-size: 1.3rem;
+    }
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--soil);
+      margin-bottom: 0.5rem;
+    }
+    .step-desc {
+      font-family: var(--font-body);
+      font-size: 0.98rem;
+      color: var(--clay);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════
+       DISEASES / DETECT SECTION
+    ═══════════════════════════════════════════════ */
+    #detect {
+      background: linear-gradient(180deg, var(--parchment) 0%, #ede3c8 100%);
+      position: relative;
+    }
+    .disease-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(45,106,79,0.1);
+      border: 1px solid rgba(45,106,79,0.25);
+      color: var(--leaf-dark);
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 0.3rem;
+      transition: all 0.3s;
+      cursor: default;
+    }
+    .disease-tag:hover {
+      background: var(--leaf);
+      color: var(--cream);
+      border-color: var(--leaf);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(45,106,79,0.3);
+    }
+    .disease-tag .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--leaf-light);
+      flex-shrink: 0;
+    }
+    .disease-tag:hover .dot { background: var(--mint); }
+
+    /* Upload demo card */
+    .upload-card {
+      background: rgba(254,250,224,0.9);
+      border: 2px dashed rgba(82,183,136,0.5);
+      border-radius: var(--radius-xl);
+      padding: 3rem 2rem;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(82,183,136,0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .upload-card:hover {
+      border-color: var(--leaf-light);
+      background: rgba(254,250,224,1);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-leaf);
+    }
+    .upload-card:hover::before { opacity: 1; }
+    .upload-icon { font-size: 4rem; margin-bottom: 1rem; display: block; animation: gentleFloat 3s ease-in-out infinite alternate; }
+    .upload-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--soil); margin-bottom: 0.5rem; }
+    .upload-sub { font-family: var(--font-body); color: var(--clay); font-size: 1rem; }
+
+    /* Result preview */
+    .result-preview {
+      background: rgba(254,250,224,0.9);
+      border: 1.5px solid rgba(82,183,136,0.3);
+      border-radius: var(--radius-xl);
+      padding: 1.8rem;
+      box-shadow: var(--shadow-leaf);
+    }
+    .result-metric {
+      background: linear-gradient(135deg, rgba(82,183,136,0.12), rgba(45,106,79,0.06));
+      border: 1px solid rgba(82,183,136,0.25);
+      border-radius: 16px;
+      padding: 1.2rem;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .result-metric:hover { transform: scale(1.04); }
+    .metric-val {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--leaf);
+    }
+    .metric-key {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-top: 0.2rem;
+    }
+
+    /* Animated progress bar */
+    .prog-bar-wrap { margin: 0.5rem 0; }
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--clay);
+      margin-bottom: 0.3rem;
+    }
+    .prog-track {
+      height: 8px;
+      background: rgba(82,183,136,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--leaf), var(--leaf-light));
+      transform-origin: left;
+      animation: fillBar 2s ease 0.5s both;
+    }
+    @keyframes fillBar {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       CHATBOT SECTION
+    ═══════════════════════════════════════════════ */
+    #chatbot {
+      background: linear-gradient(135deg, #0d2b1a 0%, var(--leaf-dark) 40%, #1a3d2b 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #chatbot::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+      pointer-events: none;
+    }
+    .chat-window {
+      background: rgba(254,250,224,0.06);
+      border: 1px solid rgba(149,213,178,0.2);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      backdrop-filter: blur(8px);
+      max-height: 460px;
+      overflow-y: auto;
+    }
+    .chat-window::-webkit-scrollbar { width: 4px; }
+    .chat-window::-webkit-scrollbar-thumb { background: rgba(82,183,136,0.4); border-radius: 2px; }
+
+    .chat-msg {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+      animation: popIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .chat-msg.user { flex-direction: row-reverse; }
+    .chat-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      border: 2px solid rgba(82,183,136,0.4);
+    }
+    .chat-avatar.bot-av { background: rgba(82,183,136,0.2); }
+    .chat-avatar.user-av { background: rgba(244,162,97,0.2); }
+    .chat-bubble {
+      max-width: 80%;
+      padding: 0.9rem 1.2rem;
+      border-radius: 18px;
+      font-family: var(--font-body);
+      font-size: 0.97rem;
+      line-height: 1.6;
+    }
+    .chat-bubble.bot {
+      background: rgba(254,250,224,0.1);
+      border: 1px solid rgba(149,213,178,0.25);
+      border-bottom-left-radius: 4px;
+      color: var(--mint);
+    }
+    .chat-bubble.user-msg {
+      background: linear-gradient(135deg, var(--leaf), #40916c);
+      border-bottom-right-radius: 4px;
+      color: var(--cream);
+    }
+    .chat-input-bar {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(254,250,224,0.08);
+      border: 1px solid rgba(149,213,178,0.25);
+      border-radius: var(--radius-pill);
+      padding: 0.7rem 1.2rem;
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 0.97rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .chat-input::placeholder { color: rgba(149,213,178,0.5); }
+    .chat-input:focus { border-color: var(--leaf-light); }
+    .chat-send {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--leaf), var(--leaf-light));
+      border: none;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .chat-send:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 6px 20px rgba(82,183,136,0.4);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Typing indicator */
+    .typing-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--leaf-light);
+      margin: 0 2px;
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30%            { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       WEATHER SECTION
+    ═══════════════════════════════════════════════ */
+    #weather-section {
+      background: linear-gradient(180deg, #ede3c8 0%, var(--parchment) 100%);
+    }
+    .weather-card {
+      background: rgba(254,250,224,0.9);
+      border: 1.5px solid rgba(82,183,136,0.25);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .weather-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--leaf-light), var(--golden), var(--leaf-light));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    .weather-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-leaf);
+    }
+    .weather-card:hover::before { transform: scaleX(1); }
+    .weather-icon { font-size: 3.5rem; margin-bottom: 0.8rem; display: block; }
+    .weather-val {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--leaf);
+    }
+    .weather-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--clay);
+    }
+
+    /* ═══════════════════════════════════════════════
+       TESTIMONIAL / FARMERS SECTION
+    ═══════════════════════════════════════════════ */
+    #testimonials {
+      background: linear-gradient(135deg, var(--bark) 0%, var(--soil) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #testimonials::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: -200px;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,168,83,0.08) 0%, transparent 70%);
+    }
+    .testimonial-card {
+      background: rgba(254,250,224,0.07);
+      border: 1px solid rgba(212,168,83,0.2);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      transition: all 0.4s;
+      height: 100%;
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: -10px; left: 20px;
+      font-family: var(--font-display);
+      font-size: 6rem;
+      color: var(--golden);
+      opacity: 0.15;
+      line-height: 1;
+    }
+    .testimonial-card:hover {
+      background: rgba(254,250,224,0.11);
+      border-color: rgba(212,168,83,0.4);
+      transform: translateY(-4px);
+    }
+    .farmer-quote {
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--parchment);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+    }
+    .farmer-info { display: flex; align-items: center; gap: 0.8rem; }
+    .farmer-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wheat), var(--rust));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 2px solid rgba(212,168,83,0.4);
+    }
+    .farmer-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--cream);
+      font-size: 1rem;
+    }
+    .farmer-region {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--wheat);
+      opacity: 0.8;
+    }
+    .stars { color: var(--golden); font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 0.8rem; }
+
+    /* ═══════════════════════════════════════════════
+       CTA SECTION
+    ═══════════════════════════════════════════════ */
+    #cta {
+      background: linear-gradient(135deg, var(--leaf-dark) 0%, var(--leaf) 60%, var(--leaf-light) 100%);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      padding: 7rem 0;
+    }
+    #cta::before {
+      content: '🌾';
+      position: absolute;
+      font-size: 20rem;
+      opacity: 0.04;
+      top: -4rem;
+      right: -2rem;
+      animation: swayA 8s ease-in-out infinite alternate;
+    }
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+    .cta-sub {
+      font-family: var(--font-body);
+      font-size: 1.2rem;
+      color: var(--mint);
+      margin-bottom: 2.5rem;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════ */
+    footer {
+      background: var(--soil);
+      padding: 3rem 0 2rem;
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+    .footer-tagline {
+      font-family: var(--font-body);
+      color: var(--wheat);
+      opacity: 0.7;
+      font-size: 0.95rem;
+    }
+    .footer-link {
+      color: var(--mint);
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      opacity: 0.8;
+      display: block;
+      margin-bottom: 0.4rem;
+      transition: all 0.2s;
+    }
+    .footer-link:hover { opacity: 1; color: var(--cream); padding-left: 4px; }
+    .footer-heading {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--wheat);
+      margin-bottom: 1rem;
+    }
+    .footer-divider {
+      border-color: rgba(212,168,83,0.15);
+      margin: 2rem 0 1.5rem;
+    }
+    .footer-bottom {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      color: var(--wheat);
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    /* ═══════════════════════════════════════════════
+       MISC ANIMATIONS
+    ═══════════════════════════════════════════════ */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Floating badge */
+    .float-badge {
+      animation: floatBadge 4s ease-in-out infinite alternate;
+    }
+    @keyframes floatBadge {
+      from { transform: translateY(0) rotate(-2deg); }
+      to   { transform: translateY(-12px) rotate(2deg); }
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .hero-stats { position: relative; bottom: auto; right: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; margin-top: 2rem; }
+      .about-visual { height: 280px; }
+      .about-img-main { width: 90%; height: 250px; }
+      .about-img-accent { display: none; }
+      .step-line { display: none; }
+      .wheat-field { height: 120px; }
+      .stalk-head { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+  <nav id="mainNav">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+      <a class="nav-brand" href="#hero">
+        <span class="wheat-icon">🌾</span>
+        AgroVisionNet
+      </a>
+      <div class="d-none d-lg-flex align-items-center gap-1">
+        <a class="nav-link-custom" href="#about">About</a>
+        <a class="nav-link-custom" href="#features">Features</a>
+        <a class="nav-link-custom" href="#how">How It Works</a>
+        <a class="nav-link-custom" href="#detect">Detect</a>
+        <a class="nav-link-custom" href="#chatbot">AI Chat</a>
+        <a class="nav-link-custom" href="#testimonials">Farmers</a>
+      </div>
+      <a class="nav-link-custom nav-cta d-none d-md-inline-flex" href="#cta">
+        <i class="bi bi-arrow-right-circle"></i> Get Started
+      </a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section id="hero">
+    <!-- Sky -->
+    <div class="sky-layer"></div>
+    <!-- Sun -->
+    <div class="sun"></div>
+    <!-- Clouds -->
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <!-- Birds -->
+    <div class="birds-container">
+      <div class="bird">🐦</div>
+      <div class="bird">🐦</div>
+      <div class="bird">🐦</div>
+    </div>
+    <!-- Particles -->
+    <div id="particles-container"></div>
+    <!-- Ground -->
+    <div class="ground-layer"></div>
+    <!-- Wheat Field -->
+    <div class="wheat-field" id="wheatField"></div>
+
+    <!-- Hero Content -->
+    <div class="container position-relative" style="z-index:10;">
+      <div class="row">
+        <div class="col-lg-7">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span>🌱</span> AI-Powered Crop Intelligence
+            </div>
+            <h1 class="hero-title">
+              Protect Your <span class="accent">Harvest</span><br/>
+              with AI Vision
+            </h1>
+            <p class="hero-subtitle">
+              Upload a leaf photo, get an instant disease diagnosis, climate risk score,
+              and personalized treatment plan — in seconds.
+            </p>
+            <div class="hero-buttons">
+              <a href="#detect" class="btn-primary-farm">
+                <i class="bi bi-camera-fill"></i> Analyze My Crop
+              </a>
+              <a href="#how" class="btn-secondary-farm">
+                <i class="bi bi-play-circle"></i> How It Works
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="hero-stats">
+      <div class="stat-card float-badge">
+        <div class="stat-num">50+</div>
+        <div class="stat-label">Diseases Detected</div>
+      </div>
+      <div class="stat-card float-badge" style="animation-delay:1s">
+        <div class="stat-num">87%</div>
+        <div class="stat-label">Accuracy Rate</div>
+      </div>
+      <div class="stat-card float-badge" style="animation-delay:2s">
+        <div class="stat-num">2s</div>
+        <div class="stat-label">Analysis Speed</div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"><i class="bi bi-chevron-down"></i></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ABOUT ═══════════════════════ -->
+  <section id="about">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <!-- Visual -->
+        <div class="col-lg-5 reveal">
+          <div class="about-visual">
+            <div class="about-img-main">
+              <div class="img-placeholder">🌾</div>
+            </div>
+            <div class="about-img-accent">
+              <div class="img-placeholder">🌿</div>
+            </div>
+            <div class="about-dot"><span>☀️</span></div>
+          </div>
+        </div>
+        <!-- Text -->
+        <div class="col-lg-7 reveal reveal-delay-2">
+          <div class="section-eyebrow">Our Mission</div>
+          <h2 class="section-title">
+            Giving Every Farmer<br/>
+            <em>Expert-Level</em> Crop Care
+          </h2>
+          <p class="section-desc mb-4">
+            AgroVisionNet was built for the fields, not the lab. We combine computer vision,
+            real-time weather intelligence, and a conversational AI to give farmers in any village
+            the same diagnostic power as an agronomist.
+          </p>
+          <div class="row g-3 mt-2">
+            <div class="col-sm-4 reveal reveal-delay-3">
+              <div style="text-align:center; padding:1rem; background:rgba(82,183,136,0.08); border-radius:16px; border:1px solid rgba(82,183,136,0.2);">
+                <div style="font-size:2rem; margin-bottom:0.4rem;">🦠</div>
+                <div style="font-family:var(--font-display); font-weight:700; color:var(--leaf); font-size:1.1rem;">Disease AI</div>
+                <div style="font-family:var(--font-body); font-size:0.88rem; color:var(--clay);">CNN-powered vision model</div>
+              </div>
+            </div>
+            <div class="col-sm-4 reveal reveal-delay-4">
+              <div style="text-align:center; padding:1rem; background:rgba(212,168,83,0.08); border-radius:16px; border:1px solid rgba(212,168,83,0.25);">
+                <div style="font-size:2rem; margin-bottom:0.4rem;">🌦️</div>
+                <div style="font-family:var(--font-display); font-weight:700; color:var(--rust); font-size:1.1rem;">Weather Intel</div>
+                <div style="font-family:var(--font-body); font-size:0.88rem; color:var(--clay);">Live climate risk fusion</div>
+              </div>
+            </div>
+            <div class="col-sm-4 reveal reveal-delay-5">
+              <div style="text-align:center; padding:1rem; background:rgba(45,106,79,0.08); border-radius:16px; border:1px solid rgba(45,106,79,0.2);">
+                <div style="font-size:2rem; margin-bottom:0.4rem;">🤖</div>
+                <div style="font-family:var(--font-display); font-weight:700; color:var(--leaf-dark); font-size:1.1rem;">AI Advisor</div>
+                <div style="font-family:var(--font-body); font-size:0.88rem; color:var(--clay);">Conversational guidance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FEATURES ═══════════════════════ -->
+  <section id="features">
+    <div class="container">
+      <div class="text-center mb-5 reveal">
+        <div class="section-eyebrow justify-content-center">What We Offer</div>
+        <h2 class="section-title">Built for the <em>Field</em></h2>
+        <p class="section-desc mx-auto" style="color:var(--mint);">
+          Every feature designed around the real challenges farmers face every season.
+        </p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-1">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🦠</div>
+            <div class="feature-title">Disease Detection</div>
+            <div class="feature-desc">CNN model identifies 50+ plant diseases from a single leaf photo with up to 94% accuracy — no lab required.</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-2">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🌦️</div>
+            <div class="feature-title">Climate Risk Scoring</div>
+            <div class="feature-desc">Combines live temperature, humidity, rainfall, and soil moisture into a unified crop risk score for your area.</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-3">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">💡</div>
+            <div class="feature-title">Smart Recommendations</div>
+            <div class="feature-desc">Get personalized fungicide, irrigation, and spacing advice tailored to your crop's disease and climate conditions.</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-2">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🤖</div>
+            <div class="feature-title">AI Farmer Chatbot</div>
+            <div class="feature-desc">Ask anything — from neem oil dosage to monsoon planting schedules. AgroBot responds in plain, practical language.</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-3">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🌍</div>
+            <div class="feature-title">Multilingual Support</div>
+            <div class="feature-desc">Full English and Tamil language support, with more regional languages coming — because farming is local.</div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 reveal reveal-delay-4">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📊</div>
+            <div class="feature-title">Health Dashboard</div>
+            <div class="feature-desc">Visual metrics, confidence scores, severity badges, and weather strips in one clean, printable report.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+  <section id="how">
+    <div class="container">
+      <div class="text-center mb-5 reveal">
+        <div class="section-eyebrow justify-content-center">Simple Process</div>
+        <h2 class="section-title">Three Steps to a <em>Healthy Harvest</em></h2>
+      </div>
+      <div class="row position-relative g-4 justify-content-center">
+        <div class="step-line d-none d-lg-block"></div>
+        <div class="col-lg-3 col-md-6 reveal reveal-delay-1">
+          <div class="step-card">
+            <div class="step-num">
+              01
+              <span class="step-icon">📷</span>
+            </div>
+            <div class="step-title">Upload a Leaf Photo</div>
+            <div class="step-desc">Take a clear photo of an affected crop leaf and upload it through the web interface or mobile app.</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 reveal reveal-delay-2">
+          <div class="step-card">
+            <div class="step-num">
+              02
+              <span class="step-icon">🔬</span>
+            </div>
+            <div class="step-title">AI Scans & Diagnoses</div>
+            <div class="step-desc">Our CNN model analyzes the image while fetching real-time weather data for your location and fusing both signals.</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 reveal reveal-delay-3">
+          <div class="step-card">
+            <div class="step-num">
+              03
+              <span class="step-icon">💊</span>
+            </div>
+            <div class="step-title">Get Your Action Plan</div>
+            <div class="step-desc">Receive a severity-ranked report with treatment steps, preventive tips, and an AI chatbot ready for follow-up questions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ DETECT / DEMO ═══════════════════════ -->
+  <section id="detect">
+    <div class="container">
+      <div class="row align-items-start g-5">
+        <!-- Left: upload + diseases -->
+        <div class="col-lg-6 reveal">
+          <div class="section-eyebrow">Live Analysis</div>
+          <h2 class="section-title">Detect Disease <em>Instantly</em></h2>
+          <p class="section-desc mb-4">
+            Supports all major kharif and rabi crops. Drop a leaf image and see results in under 2 seconds.
+          </p>
+          <div class="upload-card mb-4" onclick="simulateAnalysis()">
+            <span class="upload-icon">🌿</span>
+            <div class="upload-title">Drop or Click to Upload Leaf Image</div>
+            <div class="upload-sub">JPG, PNG — any resolution works</div>
+            <div style="margin-top:1rem;">
+              <span style="background:linear-gradient(135deg,var(--leaf),var(--leaf-light));color:var(--cream);padding:0.6rem 1.8rem;border-radius:999px;font-family:var(--font-display);font-weight:600;font-size:1rem;display:inline-block;cursor:pointer;">
+                🔬 Analyze Now
+              </span>
+            </div>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--leaf);margin-bottom:0.8rem;">Diseases We Detect</div>
+          <div id="disease-tags">
+            <span class="disease-tag"><span class="dot"></span>Leaf Blight</span>
+            <span class="disease-tag"><span class="dot"></span>Powdery Mildew</span>
+            <span class="disease-tag"><span class="dot"></span>Rust</span>
+            <span class="disease-tag"><span class="dot"></span>Fusarium Wilt</span>
+            <span class="disease-tag"><span class="dot"></span>Anthracnose</span>
+            <span class="disease-tag"><span class="dot"></span>Bacterial Spot</span>
+            <span class="disease-tag"><span class="dot"></span>Early Blight</span>
+            <span class="disease-tag"><span class="dot"></span>Late Blight</span>
+            <span class="disease-tag"><span class="dot"></span>Downy Mildew</span>
+            <span class="disease-tag"><span class="dot"></span>Septoria Leaf Spot</span>
+            <span class="disease-tag"><span class="dot"></span>Yellow Mosaic</span>
+            <span class="disease-tag"><span class="dot"></span>Root Rot</span>
+          </div>
+        </div>
+
+        <!-- Right: result preview -->
+        <div class="col-lg-6 reveal reveal-delay-2">
+          <div class="result-preview" id="resultPreview">
+            <div style="font-family:var(--font-mono);font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--leaf);margin-bottom:1rem;">📊 Sample Analysis Result</div>
+
+            <!-- Leaf preview placeholder -->
+            <div style="background:linear-gradient(135deg,var(--leaf-dark),var(--leaf));border-radius:16px;height:160px;display:flex;align-items:center;justify-content:center;font-size:5rem;margin-bottom:1.2rem;">🍃</div>
+
+            <!-- Badge -->
+            <div style="margin-bottom:1rem;">
+              <span style="background:#f4d47a;color:#7c4d00;padding:0.3rem 1rem;border-radius:999px;font-family:var(--font-mono);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">⚠️ SEVERITY: MEDIUM</span>
+            </div>
+
+            <!-- Metrics -->
+            <div class="row g-2 mb-3">
+              <div class="col-4">
+                <div class="result-metric">
+                  <div class="metric-val">Blight</div>
+                  <div class="metric-key">Disease</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="result-metric">
+                  <div class="metric-val">87%</div>
+                  <div class="metric-key">Confidence</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="result-metric">
+                  <div class="metric-val">63%</div>
+                  <div class="metric-key">Climate Risk</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confidence bars -->
+            <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--clay);margin-bottom:0.6rem;">Disease Match Scores</div>
+            <div class="prog-bar-wrap">
+              <div class="prog-label"><span>Leaf Blight</span><span>87%</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:87%"></div></div>
+            </div>
+            <div class="prog-bar-wrap">
+              <div class="prog-label"><span>Rust</span><span>9%</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:9%; background:linear-gradient(90deg,var(--wheat),var(--rust))"></div></div>
+            </div>
+            <div class="prog-bar-wrap">
+              <div class="prog-label"><span>Healthy</span><span>4%</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:4%; background:linear-gradient(90deg,#aaa,#888)"></div></div>
+            </div>
+
+            <!-- Top tip -->
+            <div style="background:rgba(82,183,136,0.1);border-left:4px solid var(--leaf-light);border-radius:0 12px 12px 0;padding:0.8rem 1rem;margin-top:1rem;font-family:var(--font-body);color:var(--soil);font-size:0.95rem;">
+              ✅ Apply copper-based fungicide every 7 days.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ WEATHER ═══════════════════════ -->
+  <section id="weather-section">
+    <div class="container">
+      <div class="text-center mb-5 reveal">
+        <div class="section-eyebrow justify-content-center">Climate Intelligence</div>
+        <h2 class="section-title">Weather-Fused <em>Risk Scoring</em></h2>
+        <p class="section-desc mx-auto">Your crop diagnosis is always paired with live climate data from your city.</p>
+      </div>
+      <div class="row g-3 justify-content-center">
+        <div class="col-6 col-md-3 reveal reveal-delay-1">
+          <div class="weather-card">
+            <span class="weather-icon">🌡️</span>
+            <div class="weather-val" id="tempVal">32°C</div>
+            <div class="weather-label">Temperature</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 reveal reveal-delay-2">
+          <div class="weather-card">
+            <span class="weather-icon">💧</span>
+            <div class="weather-val">78%</div>
+            <div class="weather-label">Humidity</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 reveal reveal-delay-3">
+          <div class="weather-card">
+            <span class="weather-icon">🌧️</span>
+            <div class="weather-val">12mm</div>
+            <div class="weather-label">Rainfall</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 reveal reveal-delay-4">
+          <div class="weather-card">
+            <span class="weather-icon">🌱</span>
+            <div class="weather-val">42%</div>
+            <div class="weather-label">Soil Moisture</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4 reveal reveal-delay-3">
+        <div style="display:inline-block;background:rgba(176,92,42,0.12);border:1px solid rgba(176,92,42,0.3);border-radius:16px;padding:1rem 2rem;font-family:var(--font-body);color:var(--rust);font-size:1rem;font-weight:600;">
+          ⚠️ Combined Climate Risk Score: <strong style="font-family:var(--font-display);font-size:1.4rem;color:var(--rust);">63%</strong> — Moderate. Fungal conditions elevated.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CHATBOT ═══════════════════════ -->
+  <section id="chatbot">
+    <div class="container position-relative" style="z-index:1;">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-5 reveal">
+          <div class="section-eyebrow" style="color:var(--mint);">AI Assistant</div>
+          <h2 class="section-title" style="color:var(--cream);">Ask AgroBot <em style="color:var(--golden);">Anything</em></h2>
+          <p class="section-desc" style="color:var(--mint); opacity:0.85;">
+            From organic pesticide mixes to monsoon irrigation plans — AgroBot answers in plain language, 24/7. Type in English or Tamil.
+          </p>
+          <ul style="list-style:none;padding:0;margin-top:1.5rem;">
+            <li style="color:var(--mint);font-family:var(--font-body);font-size:1rem;margin-bottom:0.6rem;opacity:0.9;">
+              <i class="bi bi-check-circle-fill" style="color:var(--leaf-light);margin-right:0.5rem;"></i>
+              Disease-aware responses
+            </li>
+            <li style="color:var(--mint);font-family:var(--font-body);font-size:1rem;margin-bottom:0.6rem;opacity:0.9;">
+              <i class="bi bi-check-circle-fill" style="color:var(--leaf-light);margin-right:0.5rem;"></i>
+              Weather-context replies
+            </li>
+            <li style="color:var(--mint);font-family:var(--font-body);font-size:1rem;opacity:0.9;">
+              <i class="bi bi-check-circle-fill" style="color:var(--leaf-light);margin-right:0.5rem;"></i>
+              Dosage & timing guidance
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-7 reveal reveal-delay-2">
+          <div class="chat-window" id="chatWindow">
+            <!-- Bot welcome -->
+            <div class="chat-msg">
+              <div class="chat-avatar bot-av">🌾</div>
+              <div>
+                <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--mint);opacity:0.6;margin-bottom:0.3rem;">AgroBot</div>
+                <div class="chat-bubble bot">
+                  🌾 Namaste! I've detected <strong>Leaf Blight</strong> with 87% confidence.
+                  Humidity in your area is elevated at 78% — high fungal risk today.
+                  What would you like to know about treatment?
+                </div>
+              </div>
+            </div>
+            <!-- User msg -->
+            <div class="chat-msg user">
+              <div class="chat-avatar user-av">👨‍🌾</div>
+              <div>
+                <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--golden);opacity:0.7;margin-bottom:0.3rem;text-align:right;">You</div>
+                <div class="chat-bubble user-msg">
+                  Which fungicide is best and how often should I apply it?
+                </div>
+              </div>
+            </div>
+            <!-- Bot reply -->
+            <div class="chat-msg">
+              <div class="chat-avatar bot-av">🌾</div>
+              <div>
+                <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--mint);opacity:0.6;margin-bottom:0.3rem;">AgroBot</div>
+                <div class="chat-bubble bot">
+                  For Leaf Blight with current humidity at 78%, I recommend <strong>copper oxychloride (3g/L)</strong> every 7 days.
+                  If you prefer organic: <em>neem oil + soap spray</em> every 5 days works well.
+                  Spray early morning to avoid sun burn on leaves. 🌿
+                </div>
+              </div>
+            </div>
+            <!-- Typing -->
+            <div class="chat-msg" id="typingIndicator" style="display:none;">
+              <div class="chat-avatar bot-av">🌾</div>
+              <div class="chat-bubble bot">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="chat-input-bar mt-3">
+            <input class="chat-input" id="chatInput" type="text" placeholder="Ask about treatment, dosage, irrigation..." />
+            <button class="chat-send" onclick="sendChat()">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ TESTIMONIALS ═══════════════════════ -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="text-center mb-5 reveal">
+        <div class="section-eyebrow justify-content-center" style="color:var(--wheat);">
+          <span style="background:var(--wheat);"></span>Real Farmers
+        </div>
+        <h2 class="section-title" style="color:var(--cream);">From the <em style="color:var(--golden);">Fields</em></h2>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6 reveal reveal-delay-1">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="farmer-quote">"Within 2 seconds it told me my paddy had Leaf Blight. The copper spray recommendation saved my entire kharif crop. I had never heard of this app before a neighbour showed me."</p>
+            <div class="farmer-info">
+              <div class="farmer-avatar">👨‍🌾</div>
+              <div>
+                <div class="farmer-name">Rajan Murugan</div>
+                <div class="farmer-region">Thanjavur, Tamil Nadu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 reveal reveal-delay-2">
+          <div class="testimonial-card">
+            <div class="stars">★★★★★</div>
+            <p class="farmer-quote">"The chatbot answered in Tamil. I asked about neem oil dosage and it gave me step-by-step instructions. This is not just an app — it is like having an agriculture officer in my pocket."</p>
+            <div class="farmer-info">
+              <div class="farmer-avatar">👩‍🌾</div>
+              <div>
+                <div class="farmer-name">Kavitha Selvam</div>
+                <div class="farmer-region">Madurai, Tamil Nadu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 reveal reveal-delay-3">
+          <div class="testimonial-card">
+            <div class="stars">★★★★☆</div>
+            <p class="farmer-quote">"The weather risk score is very accurate. It warned me 3 days before a fungal outbreak hit neighbouring farms. My tomatoes were already protected. Best farming tool I have used."</p>
+            <div class="farmer-info">
+              <div class="farmer-avatar">🧑‍🌾</div>
+              <div>
+                <div class="farmer-name">Senthil Kumar</div>
+                <div class="farmer-region">Coimbatore, Tamil Nadu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CTA ═══════════════════════ -->
+  <section id="cta">
+    <div class="container reveal">
+      <div class="cta-title">
+        Your Fields Deserve<br/>
+        Better Intelligence
+      </div>
+      <p class="cta-sub">
+        Join thousands of farmers already using AgroVisionNet to protect their crops, reduce pesticide waste, and increase yield.
+      </p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="#detect" class="btn-primary-farm" style="font-size:1.1rem; padding:1rem 2.5rem;">
+          <i class="bi bi-camera-fill"></i> Analyze My Crop Now
+        </a>
+        <a href="#chatbot" class="btn-secondary-farm" style="background:rgba(254,250,224,0.15);border-color:rgba(254,250,224,0.4);color:var(--cream);">
+          <i class="bi bi-chat-dots-fill"></i> Talk to AgroBot
+        </a>
+      </div>
+      <div style="margin-top:3rem;font-family:var(--font-mono);font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(149,213,178,0.6);">
+        Free to use · No sign-up required · Works offline
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer>
+    <div class="container">
+      <div class="row g-4 mb-3">
+        <div class="col-lg-4">
+          <div class="footer-brand">🌾 AgroVisionNet</div>
+          <div class="footer-tagline">Smart crop intelligence for every farmer.<br/>From field to forecast.</div>
+        </div>
+        <div class="col-sm-4 col-lg-2 offset-lg-1">
+          <div class="footer-heading">Platform</div>
+          <a class="footer-link" href="#about">About</a>
+          <a class="footer-link" href="#features">Features</a>
+          <a class="footer-link" href="#detect">Detect</a>
+          <a class="footer-link" href="#chatbot">AI Chat</a>
+        </div>
+        <div class="col-sm-4 col-lg-2">
+          <div class="footer-heading">Tech</div>
+          <a class="footer-link" href="#">CNN Model</a>
+          <a class="footer-link" href="#">Weather API</a>
+          <a class="footer-link" href="#">Risk Engine</a>
+          <a class="footer-link" href="#">Chatbot</a>
+        </div>
+        <div class="col-sm-4 col-lg-3">
+          <div class="footer-heading">Languages</div>
+          <a class="footer-link" href="#">English</a>
+          <a class="footer-link" href="#">தமிழ் (Tamil)</a>
+          <a class="footer-link" href="#" style="opacity:0.4;">हिन्दी (Coming Soon)</a>
+          <a class="footer-link" href="#" style="opacity:0.4;">తెలుగు (Coming Soon)</a>
+        </div>
+      </div>
+      <hr class="footer-divider" />
+      <div class="footer-bottom">
+        © 2025 AgroVisionNet · Built with ❤️ for Indian Farmers · Empowering Agriculture with AI
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ════════════════════════
+    // WHEAT STALK GENERATOR
+    // ════════════════════════
+    const field = document.getElementById('wheatField');
+    const CROPS = ['🌾','🌿','🌾','🌾','🌻'];
+    const SWAYS = ['sway-a','sway-b','sway-c','sway-d','sway-e'];
+    const COUNT = Math.floor(window.innerWidth / 28);
+
+    for (let i = 0; i < COUNT; i++) {
+      const group = document.createElement('div');
+      group.className = 'stalk-group';
+
+      for (let j = 0; j < 3; j++) {
+        const s = document.createElement('div');
+        const crop = CROPS[Math.floor(Math.random() * CROPS.length)];
+        const sway = SWAYS[Math.floor(Math.random() * SWAYS.length)];
+        const height = 60 + Math.random() * 100;
+        const delay = Math.random() * 3;
+
+        s.className = `stalk ${sway}`;
+        s.style.animationDelay = `${delay}s`;
+        s.innerHTML = `
+          <div class="stalk-head">${crop}</div>
+          <div class="stalk-body" style="height:${height}px;"></div>
+        `;
+        group.appendChild(s);
+      }
+      field.appendChild(group);
+    }
+
+    // ════════════════════════
+    // FLOATING PARTICLES
+    // ════════════════════════
+    const pContainer = document.getElementById('particles-container');
+    pContainer.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:hidden;';
+
+    function spawnParticle() {
+      const p = document.createElement('div');
+      const size = 2 + Math.random() * 5;
+      const colors = ['rgba(82,183,136,0.6)','rgba(212,168,83,0.5)','rgba(254,250,224,0.7)','rgba(149,213,178,0.5)'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const left = Math.random() * 100;
+      const dur = 6 + Math.random() * 10;
+      const delay = Math.random() * 5;
+
+      p.className = 'particle';
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${left}%;
+        bottom:15%;
+        background:${color};
+        animation-duration:${dur}s;
+        animation-delay:${delay}s;
+      `;
+      pContainer.appendChild(p);
+      setTimeout(() => p.remove(), (dur + delay) * 1000 + 200);
+    }
+
+    for (let i = 0; i < 30; i++) spawnParticle();
+    setInterval(spawnParticle, 800);
+
+    // ════════════════════════
+    // NAVBAR SCROLL
+    // ════════════════════════
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // ════════════════════════
+    // SCROLL REVEAL
+    // ════════════════════════
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+
+    // ════════════════════════
+    // CHATBOT
+    // ════════════════════════
+    const BOT_REPLIES = [
+      "Based on the detected Leaf Blight and current humidity of 78%, apply copper oxychloride (3g/L water) every 7 days. Early morning is the best time to spray. 🌿",
+      "For organic treatment: mix neem oil (5ml) + liquid soap (2ml) per litre of water. Spray every 5 days and after rainfall.",
+      "Avoid waterlogging — it accelerates fungal spread. Ensure row spacing ≥ 30cm for good air circulation around stems.",
+      "The climate risk score is 63% today. Tomorrow's forecast shows 80% humidity — I'd recommend preventive spraying this evening.",
+      "Remove infected leaves by hand first, then apply fungicide. Burning infected matter far from the field prevents reinfection.",
+    ];
+    let replyIdx = 0;
+
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      addMsg(msg, 'user');
+      input.value = '';
+
+      const typing = document.getElementById('typingIndicator');
+      typing.style.display = 'flex';
+      scrollChat();
+
+      setTimeout(() => {
+        typing.style.display = 'none';
+        addMsg(BOT_REPLIES[replyIdx % BOT_REPLIES.length], 'bot');
+        replyIdx++;
+      }, 1400 + Math.random() * 800);
+    }
+
+    function addMsg(text, who) {
+      const win = document.getElementById('chatWindow');
+      const isBot = who === 'bot';
+
+      const div = document.createElement('div');
+      div.className = `chat-msg${isBot ? '' : ' user'}`;
+      div.style.animationDelay = '0s';
+
+      div.innerHTML = `
+        <div class="chat-avatar ${isBot ? 'bot-av' : 'user-av'}">${isBot ? '🌾' : '👨‍🌾'}</div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:${isBot ? 'var(--mint)' : 'var(--golden)'};opacity:0.6;margin-bottom:0.3rem;${isBot ? '' : 'text-align:right;'}">
+            ${isBot ? 'AgroBot' : 'You'}
+          </div>
+          <div class="chat-bubble ${isBot ? 'bot' : 'user-msg'}">${text}</div>
+        </div>
+      `;
+
+      win.insertBefore(div, document.getElementById('typingIndicator'));
+      scrollChat();
+    }
+
+    function scrollChat() {
+      const win = document.getElementById('chatWindow');
+      win.scrollTop = win.scrollHeight;
+    }
+
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendChat();
+    });
+
+    // ════════════════════════
+    // ANALYZE SIMULATION
+    // ════════════════════════
+    function simulateAnalysis() {
+      const card = document.querySelector('.upload-card');
+      card.innerHTML = `
+        <span class="upload-icon">⏳</span>
+        <div class="upload-title">Scanning crop health patterns…</div>
+        <div class="upload-sub">AI model + weather fusion running</div>
+        <div style="margin-top:1rem;font-family:var(--font-mono);font-size:0.75rem;color:var(--leaf);animation:fadeInUp 0.5s ease both;">
+          ████████████████░░░░ 82%
+        </div>
+      `;
+      setTimeout(() => {
+        card.innerHTML = `
+          <span class="upload-icon">✅</span>
+          <div class="upload-title" style="color:var(--leaf);">Analysis Complete!</div>
+          <div class="upload-sub">Scroll down to see full report →</div>
+          <div style="margin-top:1rem;">
+            <span style="background:linear-gradient(135deg,var(--leaf),var(--leaf-light));color:var(--cream);padding:0.6rem 1.8rem;border-radius:999px;font-family:var(--font-display);font-weight:600;font-size:1rem;display:inline-block;cursor:pointer;" onclick="location.href='#detect'">
+              📊 View Report
+            </span>
+          </div>
+        `;
+        document.getElementById('resultPreview').style.outline = '3px solid var(--leaf-light)';
+        document.getElementById('resultPreview').style.transition = 'outline 0.3s';
+        setTimeout(() => {
+          document.getElementById('resultPreview').style.outline = '';
+        }, 3000);
+      }, 2200);
+    }
+
+    // ════════════════════════
+    // ANIMATE WEATHER VALUES
+    // ════════════════════════
+    function animateCounter(el, end, suffix, duration) {
+      let start = 0;
+      const step = end / (duration / 16);
+      const timer = setInterval(() => {
+        start = Math.min(start + step, end);
+        el.textContent = Math.round(start) + suffix;
+        if (start >= end) clearInterval(timer);
+      }, 16);
+    }
+
+    const weatherIO = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const vals = document.querySelectorAll('.weather-val');
+          const data = [['32','°C'],['78','%'],['12','mm'],['42','%']];
+          vals.forEach((v, i) => animateCounter(v, parseInt(data[i][0]), data[i][1], 1200));
+          weatherIO.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    const weatherSec = document.getElementById('weather-section');
+    if (weatherSec) weatherIO.observe(weatherSec);
+
+    // ════════════════════════
+    // DISEASE TAG HOVER FLOW
+    // ════════════════════════
+    document.querySelectorAll('.disease-tag').forEach((tag, i) => {
+      tag.style.animationDelay = `${i * 0.05}s`;
+    });
+  </script>
+</body>
+</html>

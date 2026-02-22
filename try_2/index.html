@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>AgroVisionNet - Smart Farming AI</title>
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+
+/* 🌾 AGRICULTURE THEME COLORS */
+:root {
+  --green-dark: #2d6a4f;
+  --green-main: #40916c;
+  --green-light: #95d5b2;
+  --soil: #7f5539;
+  --sun: #ffd166;
+}
+
+/* HERO BACKGROUND */
+.hero-section {
+  background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1600') center/cover no-repeat;
+  position: relative;
+  height: 90vh;
+}
+
+.hero-section::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.55);
+}
+
+.hero-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* BUTTON */
+.btn-agro {
+  background: var(--green-main);
+  color: white;
+  border-radius: 30px;
+  padding: 12px 28px;
+}
+
+.btn-agro:hover {
+  background: var(--green-dark);
+  color:white;
+}
+
+/* FEATURE ICON BOX */
+.feature-box {
+  text-align:center;
+  padding:30px;
+  border-radius:15px;
+  transition:0.3s;
+}
+
+.feature-box:hover {
+  transform: translateY(-8px);
+  box-shadow:0 15px 30px rgba(0,0,0,0.1);
+}
+
+/* SECTION TITLES */
+.section-title {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow">
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="#">
+🌾 AgroVisionNet
+</a>
+
+<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
+<span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="nav">
+<ul class="navbar-nav ms-auto">
+<li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="#">Analyze</a></li>
+<li class="nav-item"><a class="nav-link" href="#">AI Assistant</a></li>
+<li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+</ul>
+</div>
+
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section d-flex align-items-center text-white">
+<div class="container">
+<div class="row">
+
+<div class="col-lg-6">
+<h1 class="display-4 fw-bold mb-4">
+AI Powered Crop Health Monitoring
+</h1>
+
+<p class="mb-4">
+Detect crop diseases early, predict environmental risks,
+and improve yield using smart farming intelligence.
+</p>
+
+<a href="analyze.html" class="btn btn-agro me-3">Analyze Crop</a>
+<a href="#" class="btn btn-outline-light">Learn More</a>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section class="py-5 bg-light">
+<div class="container text-center">
+
+<h2 class="section-title mb-5">Smart Farming Features</h2>
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="feature-box bg-white">
+<i class="bi bi-bug fs-1 text-success"></i>
+<h5 class="mt-3">Disease Detection</h5>
+<p>AI image analysis detects plant diseases instantly.</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="feature-box bg-white">
+<i class="bi bi-cloud-sun fs-1 text-success"></i>
+<h5 class="mt-3">Climate Risk Prediction</h5>
+<p>Weather data predicts disease spread risk.</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="feature-box bg-white">
+<i class="bi bi-robot fs-1 text-success"></i>
+<h5 class="mt-3">AI Farming Assistant</h5>
+<p>Smart guidance and prevention recommendations.</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- ABOUT -->
+<section class="py-5">
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-lg-6">
+<img src="https://images.unsplash.com/photo-1592982537447-6f2d8c6d7b41?q=80&w=1200"
+class="img-fluid rounded">
+</div>
+
+<div class="col-lg-6">
+<h2 class="section-title">About AgroVisionNet</h2>
+
+<p>
+AgroVisionNet is an AI-powered smart farming platform that helps
+farmers detect plant diseases early and prevent crop loss.
+</p>
+
+<p>
+By combining deep learning and weather intelligence,
+our system delivers accurate insights and practical
+recommendations for sustainable agriculture.
+</p>
+
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- BENEFITS -->
+<section class="py-5 bg-light text-center">
+<div class="container">
+
+<h2 class="section-title mb-5">Why Farmers Choose Us</h2>
+
+<div class="row">
+
+<div class="col-md-4">
+<h3>🌾</h3>
+<h5>Increase Yield</h5>
+</div>
+
+<div class="col-md-4">
+<h3>💧</h3>
+<h5>Reduce Chemical Usage</h5>
+</div>
+
+<div class="col-md-4">
+<h3>💰</h3>
+<h5>Lower Farming Costs</h5>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 text-center text-white" style="background: var(--green-main);">
+<div class="container">
+<h2>Start Protecting Your Crops Today 🌱</h2>
+<a href="analyze.html" class="btn btn-light mt-3">Get Started</a>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white text-center p-4">
+AgroVisionNet © 2026 • Smart Agriculture AI
+</footer>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
